@@ -108,7 +108,7 @@ namespace cmd.UnitTests.Commands
             Assert.That(expectedRunOptions.Arguments, Is.EqualTo(string.Concat("clone ",Argument)));
         }
 
-        [Test, Ignore]
+        [Test, Ignore("")]
         public void ShouldBeAbleToCallMultipleCommandsWithPreBuiltCommando()
         {
             IRunOptions branchRunOptions = null;

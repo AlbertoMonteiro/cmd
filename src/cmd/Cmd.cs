@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Dynamic;
+using System.Runtime.CompilerServices;
 using cmd.Runner;
 using cmd.Runner.Shells;
 
+[assembly: InternalsVisibleTo("cmd.UnitTests")]
 namespace cmd
 {
     public class Cmd : DynamicObject
