@@ -5,7 +5,7 @@ namespace cmd.UnitTests.Runner.Arguments
 {
     public class PowershellArgumentBuilderTests
     {
-        private IArgumentBuilder argumentBuilder;
+        private readonly IArgumentBuilder argumentBuilder;
 
 
         public PowershellArgumentBuilderTests()

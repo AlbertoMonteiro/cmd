@@ -1,21 +1,21 @@
-﻿using System.Collections.Generic;
-using Moq;
-using cmd.Commands;
+﻿using cmd.Commands;
 using cmd.Runner;
+using NSubstitute;
+using System.Collections.Generic;
 using Xunit;
 
 namespace cmd.UnitTests
 {
     public class CmdTests
     {
-        private dynamic cmd;
-        private Mock<IRunner> mockRunner;
+        private readonly dynamic cmd;
+        private readonly IRunner _runner;
 
         public CmdTests()
         {
-            mockRunner = new Mock<IRunner>();
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
-            cmd = new Cmd(mockRunner.Object);
+            _runner = Substitute.For<IRunner>();
+            _runner.GetCommand().Returns(new Commando(_runner));
+            cmd = new Cmd(_runner);
         }
 
         [Fact]
@@ -31,15 +31,15 @@ namespace cmd.UnitTests
         {
             cmd.git();
 
-            mockRunner.Verify(runner => runner.Run(It.IsAny<IRunOptions>()), Times.Once());
+            _runner.Received().Run(Arg.Any<IRunOptions>());
         }
 
         [Fact]
         public void ShouldBeAbleToBuildMultipleCommandsOnCmd()
         {
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
+            _runner.GetCommand().Returns(new Commando(_runner));
             var git = cmd.git;
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
+            _runner.GetCommand().Returns(new Commando(_runner));
             var svn = cmd.svn;
 
             Assert.NotEqual(git, svn);
@@ -48,13 +48,13 @@ namespace cmd.UnitTests
         [Fact]
         public void ShouldBeAbleToRunMultipleCommandsOnCmd()
         {
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
+            _runner.GetCommand().Returns(new Commando(_runner));
             cmd.git();
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
+            _runner.GetCommand().Returns(new Commando(_runner));
             cmd.svn();
 
-            mockRunner.Verify(runner => runner.Run(It.Is<IRunOptions>(options => options.Command == "git")), Times.Once());
-            mockRunner.Verify(runner => runner.Run(It.Is<IRunOptions>(options => options.Command == "svn")), Times.Once());
+            _runner.Received().Run(Arg.Is<IRunOptions>(options => options.Command == "git"));
+            _runner.Received().Run(Arg.Is<IRunOptions>(options => options.Command == "svn"));
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace cmd.UnitTests
             var environmentDictionary = new Dictionary<string, string> { { "PATH", @"C:\" } };
             cmd._Env(environmentDictionary);
 
-            mockRunner.VerifySet(runner => runner.EnvironmentVariables = environmentDictionary);
+            _runner.Received().EnvironmentVariables = environmentDictionary;
         }
     }
 }

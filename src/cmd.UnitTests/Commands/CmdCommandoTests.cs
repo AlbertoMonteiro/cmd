@@ -1,6 +1,6 @@
 using cmd.Commands;
 using cmd.Runner;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace cmd.UnitTests.Commands
@@ -8,26 +8,24 @@ namespace cmd.UnitTests.Commands
 
     public class CmdCommandoTests
     {
-        private Mock<IRunner> mockRunner;
-        private dynamic cmd;
+        private readonly IRunner _runner;
+        private readonly dynamic cmd;
 
 
         public CmdCommandoTests()
         {
-            mockRunner = new Mock<IRunner>();
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new CmdCommando(mockRunner.Object));
-            cmd = new Cmd(mockRunner.Object);
+            _runner = Substitute.For<IRunner>();
+            _runner.GetCommand().Returns(new CmdCommando(_runner));
+            cmd = new Cmd(_runner);
         }
 
         [Fact]
         public void ShouldRunTheCommandAgainstCmd()
         {
             IRunOptions expectedRunOptions = null;
-            mockRunner.Setup(runner => runner.Run(It.IsAny<IRunOptions>())).Callback<IRunOptions>(options =>
-            {
-                expectedRunOptions
-                    = options;
-            });
+            _runner.Run(Arg.Any<IRunOptions>())
+                .ReturnsForAnyArgs("")
+                .AndDoes(info => expectedRunOptions = info.Arg<IRunOptions>());
 
             cmd.dir();
 

@@ -1,23 +1,23 @@
-﻿using System.Collections.Generic;
-using Moq;
-using cmd.Commands;
+﻿using cmd.Commands;
 using cmd.Runner;
 using cmd.Runner.Shells;
+using NSubstitute;
+using System.Collections.Generic;
 using Xunit;
 
 namespace cmd.UnitTests
 {
     public class CmdDslTests
     {
-        private dynamic cmd;
-        private Mock<IRunner> mockRunner;
+        private readonly dynamic cmd;
+        private readonly IRunner _runner;
 
         public CmdDslTests()
         {
-            mockRunner = new Mock<IRunner>();
-            mockRunner.Setup(runner => runner.Run(It.IsAny<IRunOptions>())).Returns("result");
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
-            cmd = new Cmd(mockRunner.Object);
+            _runner = Substitute.For<IRunner>();
+            _runner.Run(Arg.Any<IRunOptions>()).Returns("result");
+            _runner.GetCommand().Returns(new Commando(_runner));
+            cmd = new Cmd(_runner);
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace cmd.UnitTests
         [Fact]
         public void ShouldBeAbleToSetEnvironmentVariables()
         {
-            cmd._Env(new Dictionary<string, string> {{"PATH", @"C:\"}});
+            cmd._Env(new Dictionary<string, string> { { "PATH", @"C:\" } });
         }
     }
 }

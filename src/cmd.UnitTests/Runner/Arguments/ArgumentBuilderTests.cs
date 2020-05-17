@@ -1,14 +1,14 @@
-using Xunit;
 using cmd.Runner.Arguments;
+using Xunit;
 
 namespace cmd.UnitTests.Runner.Arguments
 {
-    
+
     public class ArgumentBuilderTests
     {
-        private IArgumentBuilder argumentBuilder;
+        private readonly IArgumentBuilder argumentBuilder;
 
-        
+
         public ArgumentBuilderTests()
         {
             argumentBuilder = new ArgumentBuilder();

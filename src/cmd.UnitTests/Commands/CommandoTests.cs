@@ -1,21 +1,21 @@
 using cmd.Commands;
 using cmd.Runner;
 using cmd.Runner.Arguments;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace cmd.UnitTests.Commands
 {
     public class CommandoTests
     {
-        private Mock<IRunner> mockRunner;
-        private dynamic cmd;
+        private readonly IRunner _runner;
+        private readonly dynamic cmd;
 
         public CommandoTests()
         {
-            mockRunner = new Mock<IRunner>();
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
-            cmd = new Cmd(mockRunner.Object);
+            _runner = Substitute.For<IRunner>();
+            _runner.GetCommand().Returns(new Commando(_runner));
+            cmd = new Cmd(_runner);
         }
 
         [Fact]
@@ -29,19 +29,17 @@ namespace cmd.UnitTests.Commands
         {
             cmd.git();
 
-            mockRunner.Verify(runner =>
-                runner.Run(It.Is<IRunOptions>(options => options.Command == "git" && options.Arguments == string.Empty)), Times.Once());
+            _runner.Received().Run(Arg.Is<IRunOptions>(options => options.Command == "git" && options.Arguments == string.Empty));
         }
 
         [Fact]
         public void ShouldBeAbleToGetOutputFromCommand()
         {
-            mockRunner.Setup(runner => runner.Run(It.IsAny<IRunOptions>())).Returns("out");
+            _runner.Run(Arg.Any<IRunOptions>()).Returns("out");
 
             var output = cmd.git();
 
             Assert.Equal(output, "out");
-
         }
 
         [Fact]
@@ -54,11 +52,9 @@ namespace cmd.UnitTests.Commands
         public void ShouldBeAbleToRunWithSubCommand()
         {
             IRunOptions expectedRunOptions = null;
-            mockRunner.Setup(runner => runner.Run(It.IsAny<IRunOptions>())).Callback<IRunOptions>(options =>
-                                                                                                      {
-                                                                                                          expectedRunOptions
-                                                                                                              = options;
-                                                                                                      });
+            _runner.Run(Arg.Any<IRunOptions>())
+                .ReturnsForAnyArgs("")
+                .AndDoes(info => expectedRunOptions = info.Arg<IRunOptions>());
 
             cmd.git.clone();
 
@@ -72,12 +68,10 @@ namespace cmd.UnitTests.Commands
         {
             const string Argument = "--help";
             IRunOptions expectedRunOptions = null;
-            mockRunner.Setup(runner => runner.BuildArgument(It.IsAny<Argument>())).Returns(Argument);
-            mockRunner.Setup(runner => runner.Run(It.IsAny<IRunOptions>())).Callback<IRunOptions>(options =>
-            {
-                expectedRunOptions
-                    = options;
-            });
+            _runner.BuildArgument(Arg.Any<Argument>()).Returns(Argument);
+            _runner.Run(Arg.Any<IRunOptions>())
+                .ReturnsForAnyArgs("")
+                .AndDoes(info => expectedRunOptions = info.Arg<IRunOptions>());
 
             cmd.git(help: true);
 
@@ -91,13 +85,11 @@ namespace cmd.UnitTests.Commands
         {
             const string Argument = "https://github.com/manojlds/cmd";
             IRunOptions expectedRunOptions = null;
-            mockRunner.Setup(runner => runner.BuildArgument(It.IsAny<Argument>()))
-                      .Returns(Argument);
-            mockRunner.Setup(runner => runner.Run(It.IsAny<IRunOptions>())).Callback<IRunOptions>(options =>
-            {
-                expectedRunOptions
-                    = options;
-            });
+            _runner.BuildArgument(Arg.Any<Argument>()).Returns(Argument);
+            
+            _runner.Run(Arg.Any<IRunOptions>())
+                .ReturnsForAnyArgs("")
+                .AndDoes(info => expectedRunOptions = info.Arg<IRunOptions>());
 
             cmd.git.clone(Argument);
 
@@ -110,16 +102,14 @@ namespace cmd.UnitTests.Commands
         public void ShouldBeAbleToCallMultipleCommandsWithPreBuiltCommando()
         {
             IRunOptions branchRunOptions = null;
-            mockRunner.Setup(runner => runner.Run(It.Is<IRunOptions>(options => options.Arguments.StartsWith("branch")))).Callback<IRunOptions>(options =>
-            {
-                branchRunOptions = options;
-            });
+            _runner.Run(Arg.Is<IRunOptions>(options => options.Arguments.StartsWith("branch")))
+            .ReturnsForAnyArgs("")
+                .AndDoes(info => branchRunOptions = info.Arg<IRunOptions>());
 
             IRunOptions cloneRunOptions = null;
-            mockRunner.Setup(runner => runner.Run(It.Is<IRunOptions>(options => options.Arguments.StartsWith("clone")))).Callback<IRunOptions>(options =>
-            {
-                cloneRunOptions = options;
-            });
+            _runner.Run(Arg.Is<IRunOptions>(options => options.Arguments.StartsWith("clone")))
+            .ReturnsForAnyArgs("")
+                .AndDoes(info => cloneRunOptions = info.Arg<IRunOptions>());
 
             var git = cmd.git;
             git.Clone();

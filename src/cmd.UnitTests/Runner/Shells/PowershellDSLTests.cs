@@ -1,22 +1,22 @@
 ﻿using cmd.Commands;
 using cmd.Runner;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace cmd.UnitTests.Runner.Shells
 {
     public class PowershellDSLTests
     {
-        private dynamic cmd;
-        private Mock<IRunner> mockRunner;
+        private readonly dynamic cmd;
+        private readonly IRunner _runner;
 
 
         public PowershellDSLTests()
         {
-            mockRunner = new Mock<IRunner>();
-            mockRunner.Setup(runner => runner.Run(It.IsAny<IRunOptions>())).Returns("result");
-            mockRunner.Setup(runner => runner.GetCommand()).Returns(new Commando(mockRunner.Object));
-            cmd = new Cmd(mockRunner.Object);
+            _runner = Substitute.For<IRunner>();
+            _runner.Run(Arg.Any<IRunOptions>()).Returns("result");
+            _runner.GetCommand().Returns(new Commando(_runner));
+            cmd = new Cmd(_runner);
         }
 
         [Fact]
