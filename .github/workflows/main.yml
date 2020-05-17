@@ -24,4 +24,4 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Build & Tests & Coverage
-      run: ./build.sh
+      run: ./build.sh --target Coverage
