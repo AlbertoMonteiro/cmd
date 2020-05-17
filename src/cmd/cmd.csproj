@@ -12,5 +12,7 @@
     <PackageProjectUrl>https://github.com/AlbertoMonteiro/cmd</PackageProjectUrl>
     <RepositoryUrl>https://github.com/AlbertoMonteiro/cmd</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Product>simplecmd</Product>
   </PropertyGroup>
 </Project>

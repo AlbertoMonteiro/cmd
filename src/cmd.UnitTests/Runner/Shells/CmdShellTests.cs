@@ -1,8 +1,8 @@
-using NUnit.Framework;
+using Xunit;
 
 namespace cmd.UnitTests.Runner.Shells
 {
-    [TestFixture]
+    
     class CmdShellTests
     {
     }
